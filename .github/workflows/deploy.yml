@@ -18,6 +18,7 @@ env:
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   TASK_DEF_FAMILY: ${{ secrets.TASK_DEF_FAMILY }}
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+  CONTAINER_PORT: ${{ secrets.CONTAINER_PORT }}
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
@@ -69,8 +70,12 @@ jobs:
 
       - name: Render new task definition (update image)
         run: |
-          NEW_IMAGE="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
-          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' task-def.json             | jq --arg IMG "$NEW_IMAGE" '.containerDefinitions[0].image = $IMG' > new-task-def.json
+          NEW_IMAGE="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' task-def.json \
+            | jq --arg IMG "$NEW_IMAGE" '.containerDefinitions[0].image = $IMG' \
+            | jq --arg NAME "$CONTAINER_NAME" '.containerDefinitions[0].name  = $NAME' \
+            | jq --argjson PORT ${CONTAINER_PORT} '.containerDefinitions[0].portMappings = [{"containerPort":$PORT,"hostPort":$PORT,"protocol":"tcp"}]' \
+            > new-task-def.json
           cat new-task-def.json
 
       - name: Register new task definition
