@@ -24,6 +24,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: Production
+    permissions:
+      id-token: write
+      contents: read
+      deployments: write
 
     steps:
       - name: Checkout
@@ -40,6 +44,7 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
+        
 
       - name: Login to Amazon ECR
         id: login-ecr
