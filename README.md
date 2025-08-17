@@ -45,6 +45,7 @@ In your repo → **Settings → Secrets and variables → Actions**:
 - `ECS_SERVICE` = Terraform output `ecs_service_name`
 - `TASK_DEF_FAMILY` = Terraform output `task_definition_family`
 - `CONTAINER_NAME` = `app`
+- `CONTAINER_PORT` - `80`
 
 **Secrets**
 - `AWS_ROLE_TO_ASSUME` = Terraform output `github_actions_role_arn`
